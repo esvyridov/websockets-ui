@@ -29,3 +29,9 @@ Command | Description
 `npm run start` | App served @ `http://localhost:8181` without nodemon
 
 **Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
+
+
+Registration rules:
+- name is unique among all players
+- returns error if a user is already logged in
+- players are persisted until the server is reloaded, it means you can refresh a page and logged in again with correct name and password

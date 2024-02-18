@@ -1,209 +1,74 @@
 import { WebSocket, WebSocketServer } from 'ws';
+import { DB, createDB } from './db';
+import { Session, createSession } from './session';
+import { SocketsMap, createSocketsMap } from './socketsMap';
+import { createRoomHandler, regHandler, addUserToRoomHandler, addShipsHandler, attackHandler, randomAttackHandler } from './handlers';
 
 const PORT = 3000;
 
-type PlayerId = number;
-type GameId = number;
-type RoomId = number;
-
-type Player = {
-    id: PlayerId;
-    name: string;
-    password: string;
+export type Context = {
+    ws: WebSocket;
+    db: DB;
+    session: Session;
+    socketsMap: SocketsMap;
 }
-
-type RoomUser = {
-    name: string;
-    index: PlayerId;
-}
-
-type Ship = {
-    position: {
-        x: number;
-        y: number;
-    };
-    direction: boolean;
-    length: number;
-    type: 'small' | 'medium' | 'large' | 'huge';
-}
-
-type Room = {
-    roomId: RoomId;
-    roomUsers: RoomUser[];
-};
-
-type Game = {
-    id: GameId;
-    players: Record<PlayerId, Ship[]>;
-}
-
-const players: Player[] = [];
-const games: Game[] = [];
-let rooms: Room[] = [];
-const winners: PlayerId[] = [];
-
-const wsClientsMetadata: Map<number, WebSocket> = new Map();
 
 export function createWSS() {
+    const db = createDB();
+    const socketsMap = createSocketsMap();
     const wss = new WebSocketServer({ port: PORT });
 
-    function updateRooms(rooms: Room[]) {
-        const roomsWithOnePlayer = rooms.filter((room) => room.roomUsers.length === 1);
-
-        wss.clients.forEach((wsClient) => {
-            wsClient.send(JSON.stringify({
-                type: 'update_room',
-                data: JSON.stringify(roomsWithOnePlayer),
-                id: 0,
-            }));
-        });
-    }
-
-    function updateWinners() {
-        // TODO
-    }
-
     wss.on('connection', (ws) => {
-        let currentPlayer: Player | undefined;
+        const session = createSession();
+        const context: Context = {
+            ws,
+            db,
+            session,
+            socketsMap,
+        };
 
         function cleanup() {
-            currentPlayer = undefined;
+            // TODO
+            // if (currentPlayer) {
+            //     const roomWithCurrentPlayer = rooms.findIndex((room) => room.roomUsers.some((roomUser) => roomUser.index === currentPlayer?.id));
+
+            //     if (roomWithCurrentPlayer !== -1) {
+            //         rooms = [...rooms.slice(0, roomWithCurrentPlayer), ...rooms.slice(roomWithCurrentPlayer + 1)];
+            //     }
+
+            //     playersWebSocketMap.delete(currentPlayer.id);
+            // }
+
+            // currentPlayer = undefined;
         }
 
         ws.on('message', (msg) => {
             try {
-                const { id, type, data } = JSON.parse(msg.toString());
-
+                const { type, data } = JSON.parse(msg.toString());
+                
                 if (type === 'reg') {
-                    const { name, password } = JSON.parse(data);
-                    const nextPlayerId = players.length;
-                    const doesNameTaken = players.some((player) => player.name === name);
-
-                    if (!doesNameTaken) {
-                        currentPlayer = {
-                            id: nextPlayerId,
-                            name,
-                            password,
-                        };
-
-                        players.push(currentPlayer);
-
-                        wsClientsMetadata.set(nextPlayerId, ws);
-
-                        ws.send(JSON.stringify({
-                            type: 'reg',
-                            data: JSON.stringify({
-                                name,
-                                index: nextPlayerId,
-                                error: false,
-                                errorText: '',
-                            }),
-                            id,
-                        }));
-
-                        updateRooms(rooms);
-                        updateWinners();
-
-                        return;
-                    }
-
-                    ws.send(JSON.stringify({
-                        type: 'reg',
-                        data: JSON.stringify({
-                            name,
-                            index: -1,
-                            error: true,
-                            errorText: 'Name is already taken',
-                        }),
-                        id,
-                    }));
+                    regHandler(context)(data);
                 } else if (type === 'create_room') {
-                    if (!currentPlayer) {
-                        // TODO: Error
-                        return;
-                    }
-
-                    const nextRoomId = rooms.length;
-
-                    rooms.push({
-                        roomId: nextRoomId,
-                        roomUsers: [{
-                            name: currentPlayer.name,
-                            index: currentPlayer.id,
-                        }],
-                    });
-
-                    updateRooms(rooms);
-                    updateWinners();
+                    createRoomHandler(context)();
                 } else if (type === 'add_user_to_room') {
-                    if (!currentPlayer) {
-                        // TODO: Error
-                        return;
-                    }
-
-                    const { indexRoom } = JSON.parse(data);
-
-                    const targetRoomIndex = rooms.findIndex((room) => room.roomId === indexRoom);
-
-                    if (targetRoomIndex === -1) {
-                        // TODO: error
-                        return;
-                    }
-
-                    const targetRoom = rooms[targetRoomIndex];
-                    const nextGameId = games.length;
-                    const roomCreatorPlayerId = targetRoom.roomUsers.at(0)?.index;
-
-                    if (roomCreatorPlayerId === undefined) {
-                        // TODO error
-                        return;
-                    }
-
-                    const roomCreatorWs = wsClientsMetadata.get(roomCreatorPlayerId);
-
-                    if (!roomCreatorWs) {
-                        // TODO error
-                        return;
-                    }
-
-                    rooms = [...rooms.slice(0, targetRoomIndex), ...rooms.slice(targetRoomIndex + 1)];
-
-                    updateRooms(rooms);
-
-                    const game: Game = {
-                        id: nextGameId,
-                        players: {
-                            [roomCreatorPlayerId]: [],
-                            [currentPlayer.id]: [],
-                        }
-                    };
-
-                    games.push(game);
-
-                    [ws, roomCreatorWs].forEach((ws) => {
-                        ws.send(JSON.stringify({
-                            type: 'create_game',
-                            data: JSON.stringify({
-                                idGame: game.id,
-                                idPlayer: id,
-                            }),
-                            id: 0,
-                        }));
-                    });
+                    addUserToRoomHandler(context)(data);
                 } else if (type === 'add_ships') {
-                    const { gameId, ships, indexPlayer } = JSON.parse(data);
-
-                    const gameIndexToUpdate = games.findIndex((game) => game.id === gameId);
-
-                    if (gameIndexToUpdate !== -1) {
-                        games[gameIndexToUpdate].players[indexPlayer] = ships;
-                    }
+                    addShipsHandler(context)(data);
+                } else if (type === 'attack') {
+                    attackHandler(context)(data);
+                } else if (type === 'randomAttack') {
+                    randomAttackHandler(context)(data);
                 }
             } catch (err) {
                 console.error(err);
+                ws.close();
             }
         })
-
+        
+        ws.on('error', (err) => {
+            console.log(err);
+            ws.close();
+        });
         ws.on('close', cleanup);
     })
 
