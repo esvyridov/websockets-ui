@@ -4,6 +4,7 @@ export type Session = {
     _user: User | undefined;
     setUser(user: User): void;
     getUser(): User | undefined;
+    clear(): void;
     getIsUserDefined(): boolean;
 }
 
@@ -20,6 +21,9 @@ export function createSession(): Session {
         },
         getUser() {
             return this._user;
+        },
+        clear() {
+            this._user = undefined;
         },
         getIsUserDefined() {
             return !!this._user;

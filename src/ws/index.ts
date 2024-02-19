@@ -3,6 +3,7 @@ import { DB, createDB } from './db';
 import { Session, createSession } from './session';
 import { SocketsMap, createSocketsMap } from './socketsMap';
 import { createRoomHandler, regHandler, addUserToRoomHandler, addShipsHandler, attackHandler, randomAttackHandler } from './handlers';
+import { doesSessionHaveUser } from './utils';
 
 const PORT = 3000;
 
@@ -11,6 +12,16 @@ export type Context = {
     db: DB;
     session: Session;
     socketsMap: SocketsMap;
+}
+
+function handleError(session: Session, err: unknown) {
+    if (doesSessionHaveUser(session)) {
+        const user = session.getUser();
+
+        console.log(`Internal server error has happened while processing ${user.name}:${user.id} - ${err}. Connection will be closed.`);
+    }
+    
+    console.log(`Internal server error has happened while processing unknown user - ${err}. Connection will be closed.`);
 }
 
 export function createWSS() {
@@ -28,18 +39,15 @@ export function createWSS() {
         };
 
         function cleanup() {
-            // TODO
-            // if (currentPlayer) {
-            //     const roomWithCurrentPlayer = rooms.findIndex((room) => room.roomUsers.some((roomUser) => roomUser.index === currentPlayer?.id));
+            if (doesSessionHaveUser(session)) {
+                const user = session.getUser();
 
-            //     if (roomWithCurrentPlayer !== -1) {
-            //         rooms = [...rooms.slice(0, roomWithCurrentPlayer), ...rooms.slice(roomWithCurrentPlayer + 1)];
-            //     }
+                db.rooms.deleteByUserId(user.id);
 
-            //     playersWebSocketMap.delete(currentPlayer.id);
-            // }
+                socketsMap.delete(user.id);
 
-            // currentPlayer = undefined;
+                console.log(`Connection was closed for ${user.name}:${user.id}. A room created by the user was deleted (if any).`);
+            }
         }
 
         ws.on('message', (msg) => {
@@ -60,13 +68,15 @@ export function createWSS() {
                     randomAttackHandler(context)(data);
                 }
             } catch (err) {
-                console.error(err);
+                handleError(session, err);
+
                 ws.close();
             }
         })
         
         ws.on('error', (err) => {
-            console.log(err);
+            handleError(session, err);
+
             ws.close();
         });
         ws.on('close', cleanup);

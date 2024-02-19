@@ -33,7 +33,7 @@ export function addUserToRoomHandler(context: Context) {
             return;
         }
 
-        db.rooms.delete(targetRoom.roomId);
+        db.rooms.deleteById(targetRoom.roomId);
 
         updateRoomsResponse(context)();
 

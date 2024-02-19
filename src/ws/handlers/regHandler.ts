@@ -21,6 +21,10 @@ export function regHandler(context: Context) {
                 name: newUser.name,
                 error: false,
             });
+
+            console.log(`Command - reg. New user ${newUser.name}:${newUser.id} has been created.`);
+            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
+
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
     
@@ -28,6 +32,8 @@ export function regHandler(context: Context) {
         }
     
         if (socketsMap.has(existedUser.id)) {
+            console.log(`Command - reg. Error: User ${existedUser.name}:${existedUser.id} is already logged in.`);
+
             regResponse(ws, {
                 error: true,
                 errorText: 'This player is already logged in.',
@@ -45,11 +51,17 @@ export function regHandler(context: Context) {
                 name: existedUser.name,
                 error: false,
             });
+
+            console.log(`Command - reg. Existed user ${existedUser.name}:${existedUser.id} logged in successfully.`);
+            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
+
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
             return 
         }
     
+        console.log(`Command - reg. Error: ${existedUser.name}:${existedUser.id}'s password doesn't match with provided password.`);
+
         regResponse(ws, {
             error: true,
             errorText: 'Name or password is incorrect.',

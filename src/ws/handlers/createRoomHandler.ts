@@ -6,14 +6,14 @@ export function createRoomHandler(context: Context) {
     const { db, session } = context;
     return () => {
         if (!doesSessionHaveUser(session)) {
-            console.error(`Error: create_room; currentPlayer is undefined.`)
+            console.log(`Command - create_room. Error: Session doesn't have a user.`);
             return;
         }
 
         const currentUser = session.getUser();
 
         if (db.rooms.getDoesUserHaveRoom(currentUser)) {
-            console.error(`Error: create_room; currentPlayer already has a room.`)
+            console.log(`Command - create_room. Error: User already has a room.`);
             return;
         }
 
@@ -21,6 +21,9 @@ export function createRoomHandler(context: Context) {
             name: currentUser.name,
             index: currentUser.id,
         }]));
+
+        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created.`);
+        console.log(`Command - create_room. Side effects: Rooms update, Winners update.`);
 
         updateRoomsResponse(context)();
         updateWinnersResponse(context)();

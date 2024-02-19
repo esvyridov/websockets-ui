@@ -55,7 +55,8 @@ type RoomRepository = {
     getDoesUserHaveRoom(user: User): boolean;
     buildRoom(roomUsers: RoomUser[]): Room;
     add(room: Room): void;
-    delete(index: number): void;
+    deleteById(index: number): void;
+    deleteByUserId(userId: number): void;
 }
 
 type GameRepository = {
@@ -130,7 +131,10 @@ export function createDB(): DB {
             add(room) {
                 this._data.push(room);
             },
-            delete(roomId: number) {
+            deleteByUserId(userId) {
+                this._data = this._data.filter((room) => !room.roomUsers.some((user) => user.index === userId));
+            },
+            deleteById(roomId: number) {
                 this._data = this._data.filter((room) => room.roomId !== roomId);
             }
         },
