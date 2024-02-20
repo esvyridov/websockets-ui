@@ -1,61 +1,6 @@
 import { Context } from "../index";
-import { Position, Ship } from "../db";
 import { attackResponse, finishResponse, turnResponse, updateWinnersResponse } from "../responses";
-
-function getShipCoordinates(ship: Ship): Position[] {
-    if (ship.direction) {
-        return new Array(ship.length).fill(undefined).map((_, index) => ({ x: ship.position.x as number, y: (ship.position.y as number) + index }));
-    }
-
-    return new Array(ship.length).fill(undefined).map((_, index) => ({ x: (ship.position.x as number) + index, y: ship.position.y as number }));
-}
-
-function getShipAroundCoordinates(ship: Ship): {x: number, y: number}[] {
-    const coordinates = getShipCoordinates(ship);
-    const aroundCoordinates: Position[] = [];
-    const firstCoodinate = coordinates[0];
-    const lastCoordinate = coordinates[coordinates.length - 1];
-
-    if (ship.direction) {
-        aroundCoordinates.push(...[-1, 0, 1].map((value) => ({
-            x: firstCoodinate.x + value,
-            y: firstCoodinate.y - 1,
-        })));
-        
-        coordinates.forEach((coordinate) => {
-            aroundCoordinates.push(...[-1, 1].map((value) => ({
-                x: coordinate.x + value,
-                y: coordinate.y,
-            })))
-        })
-
-        aroundCoordinates.push(...[-1, 0, 1].map((value) => ({
-            x: lastCoordinate.x + value,
-            y: lastCoordinate.y + 1,
-        })));
-
-        return aroundCoordinates;
-    }
-
-    aroundCoordinates.push(...[-1, 0, 1].map((value) => ({
-            x: firstCoodinate.x - 1,
-            y: firstCoodinate.y + value,
-        })));
-    
-    coordinates.forEach((coordinate) => {
-        aroundCoordinates.push(...[-1, 1].map((value) => ({
-            x: coordinate.x,
-            y: coordinate.y + value,
-        })))
-    })
-
-    aroundCoordinates.push(...[-1, 0, 1].map((value) => ({
-        x: lastCoordinate.x + 1,
-        y: lastCoordinate.y + value,
-    })));
-
-    return aroundCoordinates;
-}
+import { getShipAroundCoordinates, getShipCoordinates } from "../utils";
 
 export function attackHandler(context: Context) {
     const { db, socketsMap } = context;
@@ -150,7 +95,6 @@ export function attackHandler(context: Context) {
                 
                 console.log(`Command - attack. Player ${indexPlayer} killed a ship. The next turn will be done by ${indexPlayer}`);
 
-
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
                     aroundCoordinates.forEach((coordinate) => {
                         attackResponse(ws, {
@@ -178,11 +122,12 @@ export function attackHandler(context: Context) {
                         return;
                     }
 
+                    db.games.deleteById(gameId);
                     db.winners.addWin(winner.name);
 
                     updateWinnersResponse(context)();
 
-                    console.log(`Command - attack. Player with id ${indexPlayer} won the game. Winners list was been updated.`);
+                    console.log(`Command - attack. Player with id ${indexPlayer} won the game. Winners list was been updated. The game was deleted.`);
                 }
             } else {
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
