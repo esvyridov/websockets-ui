@@ -95,7 +95,7 @@ export function createWSS() {
     return wss;
 
     // TODO
-    // 4. fix random attack
     // 5. add play with bot
+    // 6. Improve logs, cleanup and error handeling
 }
 

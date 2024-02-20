@@ -40,6 +40,9 @@ export function addUserToRoomHandler(context: Context) {
         const game = db.games.buildGame({
             [roomCreatorPlayerId]: [],
             [session.getUser().id]: [],
+        }, {
+            [roomCreatorPlayerId]: [],
+            [session.getUser().id]: [],
         });
 
         db.games.add(game);

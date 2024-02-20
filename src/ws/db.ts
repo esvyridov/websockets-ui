@@ -30,6 +30,7 @@ export type Ship = {
 type Game = {
     id: number;
     players: Record<number, Ship[]>;
+    _shots: Record<number, Position[]>;
 }
 
 type Winner = {
@@ -63,11 +64,14 @@ type GameRepository = {
     _data: Game[];
     _nextGameId: number;
     getGameById(id: number): Game | undefined;
-    buildGame(players: Record<number, Ship[]>): Game;
+    buildGame(players: Record<number, Ship[]>, shots: Record<number, Position[]>): Game;
     add(game: Game): void;
     updateShips(id: number, playerId: number, ships: Ship[]): void;
+    addShot(id: number, playerId: number, shot: Position): void;
+    addShots(id: number, playerId: number, shot: Position[]): void;
     updateShipHealth(id: number, playerId: number, ship: Ship): void;
     isGameReadyToStart(id: number): boolean;
+    deleteById(gameId: number): void;
 }
 
 type WinnerRepository = {
@@ -144,13 +148,12 @@ export function createDB(): DB {
             getGameById(id) {
                 return this._data.find((game) => game.id === id);
             },
-            buildGame(players) {
+            buildGame(players, shots) {
                 this._nextGameId++;
                 return {
                     id: this._nextGameId,
                     players,
-                    _shots: [],
-                    _playersState: players,
+                    _shots: shots,
                 }
             },
             add(game) {
@@ -170,6 +173,36 @@ export function createDB(): DB {
 
                     return game;
                 })
+            },
+            addShot(id, playerId, shot) {
+                this._data = this._data.map((game) => {
+                    if (game.id === id) {
+                        return {
+                            ...game,
+                            _shots: {
+                                ...game._shots,
+                                [playerId]: [...game._shots[playerId], shot],
+                            }
+                        }
+                    }
+
+                    return game;
+                });
+            },
+            addShots(id, playerId, shots) {
+                this._data = this._data.map((game) => {
+                    if (game.id === id) {
+                        return {
+                            ...game,
+                            _shots: {
+                                ...game._shots,
+                                [playerId]: [...game._shots[playerId], ...shots],
+                            }
+                        }
+                    }
+
+                    return game;
+                });
             },
             updateShipHealth(id, playerId, ship) {
                 this._data = this._data.map((game) => {
@@ -204,6 +237,9 @@ export function createDB(): DB {
                 }
 
                 return Object.values(game.players).every((ships) => ships.length > 0);
+            },
+            deleteById(gameId) {
+                this._data = this._data.filter((game) => game.id !== gameId);
             }
         },
         winners: {

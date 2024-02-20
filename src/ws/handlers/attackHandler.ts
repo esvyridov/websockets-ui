@@ -96,7 +96,6 @@ export function attackHandler(context: Context) {
         }
 
         const otherPlayerShips = targetGame.players[+otherIndexPlayer];
-
         const targetShip = otherPlayerShips.find((ship) => {
             const coordinates: { x: number; y: number }[] = getShipCoordinates(ship);
 
@@ -117,6 +116,8 @@ export function attackHandler(context: Context) {
                 });
             });
 
+            db.games.addShot(gameId, indexPlayer, { x, y });
+
             [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
                 turnResponse(ws, {
                     currentPlayer: +otherIndexPlayer,
@@ -131,6 +132,8 @@ export function attackHandler(context: Context) {
                 const coordinates = getShipCoordinates(targetShip);
                 const aroundCoordinates = getShipAroundCoordinates(targetShip);
 
+                db.games.addShots(gameId, indexPlayer, coordinates);
+                db.games.addShots(gameId, indexPlayer, aroundCoordinates);
 
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
                     coordinates.forEach((coordinate) => {
@@ -147,6 +150,7 @@ export function attackHandler(context: Context) {
                 
                 console.log(`Command - attack. Player ${indexPlayer} killed a ship. The next turn will be done by ${indexPlayer}`);
 
+
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
                     aroundCoordinates.forEach((coordinate) => {
                         attackResponse(ws, {
@@ -159,8 +163,6 @@ export function attackHandler(context: Context) {
                         });
                     });
                 });
-
-                console.log(`Command - attack. Player ${indexPlayer} killed a ship. The next turn will be done by ${indexPlayer}`);
 
                 if (otherPlayerShips.every((ship) => ship._health === 0)) {
                     [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
@@ -193,6 +195,8 @@ export function attackHandler(context: Context) {
                         status: 'shot',
                     });
                 });
+
+                db.games.addShot(gameId, indexPlayer, { x, y });
 
                 console.log(`Command - attack. Player ${indexPlayer} hit a part of a ship. The next turn will be done by ${indexPlayer}`);
             }
