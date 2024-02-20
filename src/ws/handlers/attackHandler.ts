@@ -65,33 +65,33 @@ export function attackHandler(context: Context) {
         const indexPlayerWs = socketsMap.get(indexPlayer);
 
         if (!indexPlayerWs) {
-            console.error(`Error: attack; indexPlayer websocket doesn't exist.`);
+            console.log(`Command - attack. Error: Player with id ${indexPlayer} doesn't have active websocket.`);
             return;
         }
 
         const targetGame = db.games.getGameById(gameId);
 
         if (!targetGame) {
-            console.error(`Error: attack; targetGame doesn't exist.`);
+            console.log(`Command - attack. Error: Game with ${gameId} doesn't exist.`);
             return;
         }
 
         if (!(indexPlayer in targetGame.players)) {
-            console.error(`Error: attack; indexPlayer doesn't exist in the game.`);
+            console.log(`Command - attack. Error: Player with id ${indexPlayer} doesn't exist in the list of players of game ${gameId}.`);
             return;
         }
 
         const otherIndexPlayer = Object.keys(targetGame.players).find((id) => +id !== indexPlayer);
 
         if (otherIndexPlayer === undefined) {
-            console.error(`Error: attack; can't determine another player in the game.`);
+            console.log(`Command - attack. Error: Can't find a rival for ${indexPlayer} in the game ${gameId}.`);
             return;
         }
 
         const otherIndexPlayerWs = socketsMap.get(+otherIndexPlayer);
 
         if (!otherIndexPlayerWs) {
-            console.error(`Error: attack; otherIndexPlayer websocket doesn't exist.`);
+            console.log(`Command - attack. Error: Player with id ${otherIndexPlayer} doesn't have active websocket.`);
             return;
         }
 
@@ -122,6 +122,8 @@ export function attackHandler(context: Context) {
                     currentPlayer: +otherIndexPlayer,
                 });
             })
+
+            console.log(`Command - attack. Player ${indexPlayer} missed. A turn goes to player ${otherIndexPlayer}`);
         } else {
             targetShip._health--;
 
@@ -143,6 +145,7 @@ export function attackHandler(context: Context) {
                     });
                 });
                 
+                console.log(`Command - attack. Player ${indexPlayer} killed a ship. The next turn will be done by ${indexPlayer}`);
 
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
                     aroundCoordinates.forEach((coordinate) => {
@@ -156,6 +159,8 @@ export function attackHandler(context: Context) {
                         });
                     });
                 });
+
+                console.log(`Command - attack. Player ${indexPlayer} killed a ship. The next turn will be done by ${indexPlayer}`);
 
                 if (otherPlayerShips.every((ship) => ship._health === 0)) {
                     [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
@@ -174,6 +179,8 @@ export function attackHandler(context: Context) {
                     db.winners.addWin(winner.name);
 
                     updateWinnersResponse(context)();
+
+                    console.log(`Command - attack. Player with id ${indexPlayer} won the game. Winners list was been updated.`);
                 }
             } else {
                 [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
@@ -186,6 +193,8 @@ export function attackHandler(context: Context) {
                         status: 'shot',
                     });
                 });
+
+                console.log(`Command - attack. Player ${indexPlayer} hit a part of a ship. The next turn will be done by ${indexPlayer}`);
             }
 
             [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {

@@ -6,7 +6,7 @@ export function addUserToRoomHandler(context: Context) {
     const { ws, db, session, socketsMap } = context;
     return (data: any) => {
         if (!doesSessionHaveUser(session)) {
-            console.error(`Error: add_user_to_room; currentPlayer is undefined.`)
+            console.log(`Command - add_user_to_room. Error: Session doesn't have a user.`);
             return;
         }
 
@@ -15,21 +15,21 @@ export function addUserToRoomHandler(context: Context) {
         const targetRoom = db.rooms.getRoomById(indexRoom);
 
         if (!targetRoom) {
-            console.error(`Error: add_user_to_room; targetRoom doesn't exist.`)
+            console.log(`Command - add_user_to_room. Error: A target room doesn't exist.`);
             return;
         }
 
         const roomCreatorPlayerId = targetRoom.roomUsers.at(0)?.index;
 
         if (roomCreatorPlayerId === undefined) {
-            console.error(`Error: add_user_to_room; roomCreatorPlayerId is undefined.`)
+            console.log(`Command - add_user_to_room. Error: Room creator doesn't exist.`);
             return;
         }
 
         const roomCreatorWs = socketsMap.get(roomCreatorPlayerId);
 
         if (!roomCreatorWs) {
-            console.error(`Error: add_user_to_room; roomCreatorWs is undefined.`)
+            console.log(`Command - add_user_to_room. Error: Room creator websocket doesn't exist.`);
             return;
         }
 
@@ -52,5 +52,8 @@ export function addUserToRoomHandler(context: Context) {
             idGame: game.id,
             idPlayer: session.getUser().id,
         });
+
+        console.log(`Command - add_user_to_room. A user has been added to the room.`);
+        console.log(`Command - add_user_to_room. Side effects: Rooms update (the room was deleted), game was created.`);
     }
 };

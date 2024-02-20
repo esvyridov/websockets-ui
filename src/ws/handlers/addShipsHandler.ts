@@ -11,16 +11,18 @@ export function addShipsHandler(context: Context) {
         const targetGame = db.games.getGameById(gameId);
 
         if (!targetGame) {
-            console.error(`Error: add_ships; targetGame doesn't exist.`)
+            console.log(`Command - add_ships. Error: targetGame doesn't exist.`);
             return;
         }
 
         if (!(indexPlayer in targetGame.players)) {
-            console.error(`Error: add_ships; indexPlayer is not found in the game.`)
+            console.log(`Command - add_ships. Error: indexPlayer is not found in the game.`);
             return;
         }
 
         db.games.updateShips(targetGame.id, indexPlayer, (ships as Ship[]).map((ship) => ({ ...ship, _health: ship.length} )));
+
+        console.log(`Command - add_ships. Ships for ${indexPlayer} were updated.`);
 
         if (db.games.isGameReadyToStart(targetGame.id)) {
             const playersData = Object.entries(targetGame.players)
@@ -29,7 +31,7 @@ export function addShipsHandler(context: Context) {
 
 
             if (playersData.length !== 2) {
-                console.error(`Error: add_ships; a player in the room doesn't have active socket.`)
+                console.log(`Command - add_ships. Error: some player is the room doesn't have active connection.`);
                 return;
             }
 
@@ -47,6 +49,9 @@ export function addShipsHandler(context: Context) {
                     currentPlayer: playerDataToStart.id,
                 });
             });
+
+            console.log(`Command - add_ships. The game is ready to start.`);
+            console.log(`Command - add_ships. Side effects: The game was started, a turn was given to the first player.`);
         }
     }
 };

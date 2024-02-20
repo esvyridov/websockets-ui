@@ -22,11 +22,11 @@ export function regHandler(context: Context) {
                 error: false,
             });
 
-            console.log(`Command - reg. New user ${newUser.name}:${newUser.id} has been created.`);
-            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
-
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
+
+            console.log(`Command - reg. New user ${newUser.name}:${newUser.id} has been created.`);
+            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
     
             return;
         }
@@ -52,20 +52,20 @@ export function regHandler(context: Context) {
                 error: false,
             });
 
-            console.log(`Command - reg. Existed user ${existedUser.name}:${existedUser.id} logged in successfully.`);
-            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
-
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
+
+            console.log(`Command - reg. Existed user ${existedUser.name}:${existedUser.id} logged in successfully.`);
+            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
             return 
         }
-    
-        console.log(`Command - reg. Error: ${existedUser.name}:${existedUser.id}'s password doesn't match with provided password.`);
-
+        
         regResponse(ws, {
             error: true,
             errorText: 'Name or password is incorrect.',
         });
+
+        console.log(`Command - reg. Error: ${existedUser.name}:${existedUser.id}'s password doesn't match with provided password.`);
     }
 }
 

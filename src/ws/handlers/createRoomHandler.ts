@@ -1,5 +1,5 @@
 import { Context } from "../index";
-import { updateRoomsResponse, updateWinnersResponse } from "../responses";
+import { updateRoomsResponse } from "../responses";
 import { doesSessionHaveUser } from "../utils";
 
 export function createRoomHandler(context: Context) {
@@ -22,10 +22,9 @@ export function createRoomHandler(context: Context) {
             index: currentUser.id,
         }]));
 
-        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created.`);
-        console.log(`Command - create_room. Side effects: Rooms update, Winners update.`);
-
         updateRoomsResponse(context)();
-        updateWinnersResponse(context)();
+        
+        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created.`);
+        console.log(`Command - create_room. Side effects: Rooms update.`);
     }
 };
