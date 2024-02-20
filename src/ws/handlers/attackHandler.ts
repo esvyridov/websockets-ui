@@ -106,13 +106,15 @@ export function attackHandler(context: Context) {
         });
 
         if (!targetShip) {
-            attackResponse(indexPlayerWs, {
-                position: {
-                    x,
-                    y
-                },
-                currentPlayer: indexPlayer,
-                status: 'miss',
+            [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
+                attackResponse(ws, {
+                    position: {
+                        x,
+                        y
+                    },
+                    currentPlayer: indexPlayer,
+                    status: 'miss',
+                });
             });
 
             [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
@@ -127,25 +129,31 @@ export function attackHandler(context: Context) {
                 const coordinates = getShipCoordinates(targetShip);
                 const aroundCoordinates = getShipAroundCoordinates(targetShip);
 
-                coordinates.forEach((coordinate) => {
-                    attackResponse(indexPlayerWs, {
-                        position: {
-                            x: coordinate.x,
-                            y: coordinate.y,
-                        },
-                        currentPlayer: indexPlayer,
-                        status: 'killed',
+
+                [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
+                    coordinates.forEach((coordinate) => {
+                        attackResponse(ws, {
+                            position: {
+                                x: coordinate.x,
+                                y: coordinate.y,
+                            },
+                            currentPlayer: indexPlayer,
+                            status: 'killed',
+                        });
                     });
                 });
+                
 
-                aroundCoordinates.forEach((coordinate) => {
-                    attackResponse(indexPlayerWs, {
-                        position: {
-                            x: coordinate.x,
-                            y: coordinate.y,
-                        },
-                        currentPlayer: indexPlayer,
-                        status: 'miss',
+                [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
+                    aroundCoordinates.forEach((coordinate) => {
+                        attackResponse(ws, {
+                            position: {
+                                x: coordinate.x,
+                                y: coordinate.y,
+                            },
+                            currentPlayer: indexPlayer,
+                            status: 'miss',
+                        });
                     });
                 });
 
@@ -168,13 +176,15 @@ export function attackHandler(context: Context) {
                     updateWinnersResponse(context)();
                 }
             } else {
-                attackResponse(indexPlayerWs, {
-                    position: {
-                        x,
-                        y
-                    },
-                    currentPlayer: indexPlayer,
-                    status: 'shot',
+                [indexPlayerWs, otherIndexPlayerWs].forEach((ws) => {
+                    attackResponse(indexPlayerWs, {
+                        position: {
+                            x,
+                            y
+                        },
+                        currentPlayer: indexPlayer,
+                        status: 'shot',
+                    });
                 });
             }
 

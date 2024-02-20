@@ -83,9 +83,20 @@ export function createWSS() {
     })
 
     wss.on('listening', () => {
-        console.log(`WS server is listening on ${PORT} port!`)
+        const address = wss.address();
+
+        if (typeof address === 'string') {
+            console.log(`WS server is listening on ${PORT} port!`)
+        } else {
+            console.log(`WS server is listening on ${address.address}:${address.port} port!`)
+        }
     })
 
     return wss;
+
+    // TODO
+    // 4. add play with bot
+    // 5. fix random attack
+
 }
 
