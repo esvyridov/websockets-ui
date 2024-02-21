@@ -10,20 +10,20 @@ export function createRoomHandler(context: Context) {
             return;
         }
 
-        const currentUser = session.getUser();
+        const user = session.getUser();
 
-        if (db.rooms.getDoesUserHaveRoom(currentUser)) {
+        if (db.rooms.getDoesUserHaveRoom(user)) {
             console.log(`Command - create_room. Error: User already has a room.`);
             return;
         }
 
         db.rooms.add(db.rooms.buildRoom([{
-            name: currentUser.name,
-            index: currentUser.id,
+            name: user.name,
+            index: user.id,
         }]));
 
         updateRoomsResponse(context)();
         
-        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created. Rooms were updated.`);
+        console.log(`Command - create_room. New room for a user ${user.name}:${user.id} has been created. Rooms were updated.`);
     }
 };
