@@ -1,5 +1,5 @@
 import { Context } from "../index";
-import { updateRoomsResponse, updateWinnersResponse, createGameResponse } from "../responses";
+import { updateRoomsResponse, createGameResponse } from "../responses";
 import { doesSessionHaveUser } from "../utils";
 
 export function addUserToRoomHandler(context: Context) {

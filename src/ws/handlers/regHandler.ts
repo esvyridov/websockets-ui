@@ -18,7 +18,6 @@ export function regHandler(context: Context) {
         }
 
         if (!existedUser) {
-
             const newUser = db.users.buildUser(name, password);
 
             session.setUser(newUser);

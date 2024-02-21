@@ -3,6 +3,7 @@ import { Context } from "../index";
 import { Ship } from "../db";
 import { startGameResponse, turnResponse } from "../responses";
 import { BOT_ID } from "../utils";
+import { BOT_SHIPS } from '../constants';
 
 export function addShipsHandler(context: Context) {
     const { db, socketsMap } = context;
@@ -33,7 +34,9 @@ export function addShipsHandler(context: Context) {
         console.log(`Command - add_ships. Ships for ${indexPlayer} were updated.`);
 
         if (+otherIndexPlayer === BOT_ID) {
-            db.games.updateShips(targetGame.id, BOT_ID, (ships as Ship[]).map((ship) => ({ ...ship, _health: ship.length} )));
+            const randomShips: Ship[] = BOT_SHIPS[Math.floor(Math.random() * BOT_SHIPS.length)]
+
+            db.games.updateShips(targetGame.id, BOT_ID, randomShips);
 
             const indexPlayerWs = socketsMap.get(indexPlayer);
 
