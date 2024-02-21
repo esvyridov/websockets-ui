@@ -1,5 +1,9 @@
 import { Position, Ship } from "./db";
-import { Session, SessionWithUser } from "./session"
+import { Session, SessionWithUser } from "./session";
+
+export const BOT_ID = -1;
+
+export const sleep = () => new Promise<void>((resolve) => setTimeout(() => resolve(), 500));
 
 export function doesSessionHaveUser(session: Session): session is SessionWithUser {
     return !!session.getIsUserDefined();

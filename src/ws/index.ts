@@ -2,7 +2,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { DB, createDB } from './db';
 import { Session, createSession } from './session';
 import { SocketsMap, createSocketsMap } from './socketsMap';
-import { createRoomHandler, regHandler, addUserToRoomHandler, addShipsHandler, attackHandler, randomAttackHandler } from './handlers';
+import { createRoomHandler, regHandler, addUserToRoomHandler, addShipsHandler, attackHandler, randomAttackHandler, singlePlayHandler } from './handlers';
 import { doesSessionHaveUser } from './utils';
 
 const PORT = 3000;
@@ -66,6 +66,8 @@ export function createWSS() {
                     attackHandler(context)(data);
                 } else if (type === 'randomAttack') {
                     randomAttackHandler(context)(data);
+                } else if (type === 'single_play') {
+                    singlePlayHandler(context)(data);
                 }
             } catch (err) {
                 handleError(session, err);
@@ -95,7 +97,6 @@ export function createWSS() {
     return wss;
 
     // TODO
-    // 5. add play with bot
-    // 6. Improve logs, cleanup and error handeling
+    // 6. cleanup and error handeling
 }
 

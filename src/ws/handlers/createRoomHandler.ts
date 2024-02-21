@@ -24,7 +24,6 @@ export function createRoomHandler(context: Context) {
 
         updateRoomsResponse(context)();
         
-        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created.`);
-        console.log(`Command - create_room. Side effects: Rooms update.`);
+        console.log(`Command - create_room. New room for a user ${currentUser.name}:${currentUser.id} has been created. Rooms were updated.`);
     }
 };

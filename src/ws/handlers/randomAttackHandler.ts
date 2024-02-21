@@ -16,7 +16,7 @@ export function randomAttackHandler(context: Context) {
         const indexPlayerShots = targetGame._shots[indexPlayer];
 
         if (indexPlayerShots === undefined) {
-            console.log(`Command - randomAttack. Error: Index player shots don't exist.`);
+            console.log(`Command - randomAttack. Error: Index player shots lis doesn't exist.`);
             return;
         }
 
@@ -26,11 +26,10 @@ export function randomAttackHandler(context: Context) {
         do {
             x = Math.floor(Math.random() * 10);
             y = Math.floor(Math.random() * 10);
-            console.log(`Command - randomAttack. A random coordinates were calculated for a player ${indexPlayer}, coordinates - ${x}:${y}. (if this log repeats then the coordinates have been used already and will be regenerated)`);
         }
         while (indexPlayerShots.some((shot) => shot.x === x && shot.y === y))
 
-        console.log(`Command - randomAttack. A random attack was done for a player ${indexPlayer}, coordinates - ${x}:${y}.`);
+        console.log(`Command - randomAttack. Player ${indexPlayer} used a random attack. Coordinates - ${x}:${y}.`);
 
         attackHandler(context)(JSON.stringify({
             gameId,

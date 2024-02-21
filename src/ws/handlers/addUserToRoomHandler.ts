@@ -56,7 +56,6 @@ export function addUserToRoomHandler(context: Context) {
             idPlayer: session.getUser().id,
         });
 
-        console.log(`Command - add_user_to_room. A user has been added to the room.`);
-        console.log(`Command - add_user_to_room. Side effects: Rooms update (the room was deleted), game was created.`);
+        console.log(`Command - add_user_to_room. A user has been added to the room. The room was deleted and the game was created. Rooms were updated.`);
     }
 };

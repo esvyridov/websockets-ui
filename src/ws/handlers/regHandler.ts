@@ -25,8 +25,7 @@ export function regHandler(context: Context) {
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
 
-            console.log(`Command - reg. New user ${newUser.name}:${newUser.id} has been created.`);
-            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
+            console.log(`Command - reg. New user ${newUser.name}:${newUser.id} has been created. Rooms and winners were updated.`);
     
             return;
         }
@@ -55,8 +54,7 @@ export function regHandler(context: Context) {
             updateRoomsResponse(context)();
             updateWinnersResponse(context)();
 
-            console.log(`Command - reg. Existed user ${existedUser.name}:${existedUser.id} logged in successfully.`);
-            console.log(`Command - reg. Side effects: Rooms update, Winners update.`);
+            console.log(`Command - reg. Existed user ${existedUser.name}:${existedUser.id} logged in successfully. Rooms and winners for all active users were updated.`);
             return 
         }
         
