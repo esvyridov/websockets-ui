@@ -31,7 +31,7 @@ export function addShipsHandler(context: Context) {
 
         db.games.updateShips(targetGame.id, indexPlayer, (ships as Ship[]).map((ship) => ({ ...ship, _health: ship.length} )));
 
-        console.log(`Command - add_ships. Ships for ${indexPlayer} were updated.`);
+        console.log(`Command - add_ships. Ships for ${indexPlayer} in the game ${targetGame.id} were updated.`);
 
         if (+otherIndexPlayer === BOT_ID) {
             const randomShips: Ship[] = BOT_SHIPS[Math.floor(Math.random() * BOT_SHIPS.length)]
@@ -61,7 +61,6 @@ export function addShipsHandler(context: Context) {
             const playersData = Object.entries(targetGame.players)
                 .map(([id, ships]) => ({id: +id, ws: socketsMap.get(+id),  ships}))
                 .filter((data): data is { id: number, ws: WebSocket, ships: Ship[] } => !!data.ws)
-
 
             if (playersData.length !== 2) {
                 console.log(`Command - add_ships. Error: some player in the room doesn't have active connection.`);
