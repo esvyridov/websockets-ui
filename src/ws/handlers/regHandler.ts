@@ -7,7 +7,18 @@ export function regHandler(context: Context) {
         const { name, password } = JSON.parse(data);
         const existedUser = db.users.getByName(name);
     
+        if (name.length < 5 || password.length < 5) {
+            regResponse(ws, {
+                error: true,
+                errorText: 'Provided name or password is less than 5 characters.',
+            });
+
+            console.log(`Command - reg. Error: Provided name or password is less than 5 characters.`);
+            return;
+        }
+
         if (!existedUser) {
+
             const newUser = db.users.buildUser(name, password);
 
             session.setUser(newUser);
