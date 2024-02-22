@@ -58,6 +58,15 @@ export function attackHandler(context: Context) {
     
             const playersWss = [indexPlayerWs, otherIndexPlayerWs].filter((ws): ws is WebSocket => !!ws);
     
+            if (targetGame._shots[indexPlayer].some((shot) => shot.x === x && shot.y === y)) {
+                playersWss.forEach((ws) => {
+                    turnResponse(ws, {
+                        currentPlayer: targetGame._nextPlayerIdTurn,
+                    });
+                })
+                return;
+            }
+
             if (!targetShip) {
                 playersWss.forEach((ws) => {
                     attackResponse(ws, {
