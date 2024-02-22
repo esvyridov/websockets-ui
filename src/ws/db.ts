@@ -53,6 +53,7 @@ type RoomRepository = {
     _nextRoomId: number;
     getRooms(): Room[];
     getRoomById(id: number): Room | undefined;
+    getRoomByUserId(id: number): Room | undefined;
     getRoomsWithOneUser(): Room[];
     getDoesUserHaveRoom(user: User): boolean;
     buildRoom(roomUsers: RoomUser[]): Room;
@@ -65,6 +66,7 @@ type GameRepository = {
     _data: Game[];
     _nextGameId: number;
     getGameById(id: number): Game | undefined;
+    getGameByUserId(userId: number): Game | undefined;
     buildGame(players: Record<number, Ship[]>, shots: Record<number, Position[]>, _nextPlayerIdTurn: number): Game;
     add(game: Game): void;
     updateShips(id: number, playerId: number, ships: Ship[]): void;
@@ -118,6 +120,9 @@ export function createDB(): DB {
             getRoomById(id: number) {
                 return this._data.find((room) => room.roomId === id);
             },
+            getRoomByUserId(userId: number) {
+                return this._data.find((room) => room.roomUsers.some((roomUser) => roomUser.index === userId));
+            },
             getRoomsWithOneUser() {
                 return this._data.filter((room) => room.roomUsers.length === 1)
             },
@@ -146,6 +151,9 @@ export function createDB(): DB {
             _nextGameId: 0,
             getGameById(id) {
                 return this._data.find((game) => game.id === id);
+            },
+            getGameByUserId(userId) {
+                return this._data.find((game) => userId in game.players);
             },
             buildGame(players, shots, nextPlayerIdTurn) {
                 this._nextGameId++;

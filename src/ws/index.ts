@@ -4,6 +4,7 @@ import { Session, createSession } from './session';
 import { SocketsMap, createSocketsMap } from './socketsMap';
 import { createRoomHandler, regHandler, addUserToRoomHandler, addShipsHandler, attackHandler, randomAttackHandler, singlePlayHandler } from './handlers';
 import { doesSessionHaveUser } from './utils';
+import { finishResponse, updateWinnersResponse } from './responses';
 
 const PORT = 3000;
 
@@ -42,11 +43,57 @@ export function createWSS() {
             if (doesSessionHaveUser(session)) {
                 const user = session.getUser();
 
-                db.rooms.deleteByUserId(user.id);
+                const userRoom = db.rooms.getRoomByUserId(user.id);
+
+                if (userRoom) {
+                    db.rooms.deleteByUserId(user.id);
+
+                    console.log(`Room with id ${userRoom.roomId} was deleted because ${user.name}:${user.id} lost connection to the server.`)
+                }
+
+                const userGame = db.games.getGameByUserId(user.id);
+
+                if (userGame) {
+                    const rivalId = Object.keys(userGame.players).find((id) => +id !== user.id);
+
+                    if (!rivalId) {
+                        db.games.deleteById(userGame.id);
+
+                        console.log(`Game with id ${userGame.id} was deleted because ${user.name}:${user.id} lost connection to the server.`);
+                    } else {
+                        const rivalWs = socketsMap.get(+rivalId);
+
+                        if (!rivalWs) {
+                            db.games.deleteById(userGame.id);
+
+                            console.log(`Game with id ${userGame.id} was deleted because ${user.name}:${user.id} lost connection to the server.`);
+                        } else {
+                            finishResponse(rivalWs, {
+                                winPlayer: +rivalId,
+                            });
+        
+                            const winner = db.users.getById(+rivalId);
+        
+                            if (!winner) {
+                                db.games.deleteById(userGame.id);
+
+                                console.log(`Game with id ${userGame.id} was deleted because ${user.name}:${user.id} lost connection to the server.`);
+                                console.error(`Error: cleanup; winner doesn't exist.`);
+                                return;
+                            } else {
+                                db.games.deleteById(userGame.id);
+                                db.winners.addWin(winner.name);
+                                updateWinnersResponse(context)();
+
+                                console.log(`Game with id ${userGame.id} was deleted because ${user.name}:${user.id} lost connection to the server. ${winner.name} automatically won the game.`);
+                            }
+                        }
+                    }
+                }
 
                 socketsMap.delete(user.id);
 
-                console.log(`Connection was closed for ${user.name}:${user.id}. A room created by the user was deleted (if any).`);
+                console.log(`Connection was closed for ${user.name}:${user.id}.`);
             }
         }
 
@@ -95,8 +142,5 @@ export function createWSS() {
     })
 
     return wss;
-
-    // TODO
-    // 6. cleanup and error handeling
 }
 
