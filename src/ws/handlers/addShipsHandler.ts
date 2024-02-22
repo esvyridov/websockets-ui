@@ -51,7 +51,7 @@ export function addShipsHandler(context: Context) {
             });
 
             turnResponse(indexPlayerWs, {
-                currentPlayer: indexPlayer,
+                currentPlayer: targetGame._nextPlayerIdTurn,
             });
 
             return;
@@ -74,11 +74,9 @@ export function addShipsHandler(context: Context) {
                 })
             });
 
-            const playerDataToStart = playersData[0];
-
             playersData.forEach(({ ws }) => {
                 turnResponse(ws, {
-                    currentPlayer: playerDataToStart.id,
+                    currentPlayer: targetGame._nextPlayerIdTurn,
                 });
             });
 

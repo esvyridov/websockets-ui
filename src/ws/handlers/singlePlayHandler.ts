@@ -25,7 +25,7 @@ export function singlePlayHandler(context: Context) {
         }, {
             [user.id]: [],
             [BOT_ID]: [],
-        });
+        }, user.id);
 
         db.games.add(game);
 

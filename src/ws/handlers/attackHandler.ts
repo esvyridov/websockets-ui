@@ -23,6 +23,10 @@ export function attackHandler(context: Context) {
                 console.log(`Command - attack. Error: Game with ${gameId} doesn't exist.`);
                 return;
             }
+
+            if (targetGame._nextPlayerIdTurn !== indexPlayer) {
+                return;
+            }
     
             if (!(indexPlayer in targetGame.players)) {
                 console.log(`Command - attack. Error: Player with id ${indexPlayer} doesn't exist in the list of players of game ${gameId}.`);
@@ -66,11 +70,12 @@ export function attackHandler(context: Context) {
                     });
                 });
     
-                db.games.addShot(gameId, indexPlayer, { x, y });
+                targetGame._nextPlayerIdTurn = +otherIndexPlayer;
+                targetGame._shots[indexPlayer].push({x, y});
     
                 playersWss.forEach((ws) => {
                     turnResponse(ws, {
-                        currentPlayer: +otherIndexPlayer,
+                        currentPlayer: targetGame._nextPlayerIdTurn,
                     });
                 })
     
@@ -90,8 +95,8 @@ export function attackHandler(context: Context) {
                     const coordinates = getShipCoordinates(targetShip);
                     const aroundCoordinates = getShipAroundCoordinates(targetShip);
     
-                    db.games.addShots(gameId, indexPlayer, coordinates);
-                    db.games.addShots(gameId, indexPlayer, aroundCoordinates);
+                    targetGame._shots[indexPlayer].push(...coordinates);
+                    targetGame._shots[indexPlayer].push(...aroundCoordinates);
     
                     playersWss.forEach((ws) => {
                         coordinates.forEach((coordinate) => {
@@ -154,14 +159,14 @@ export function attackHandler(context: Context) {
                         });
                     });
     
-                    db.games.addShot(gameId, indexPlayer, { x, y });
+                    targetGame._shots[indexPlayer].push({ x, y });
     
                     console.log(`Command - attack. Player ${indexPlayer} hit a part of a ship. The next turn will be done by ${indexPlayer}`);
                 }
     
                 playersWss.forEach((ws) => {
                     turnResponse(ws, {
-                        currentPlayer: indexPlayer,
+                        currentPlayer: targetGame._nextPlayerIdTurn,
                     });
                 })
     

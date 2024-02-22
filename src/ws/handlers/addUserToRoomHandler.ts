@@ -43,7 +43,7 @@ export function addUserToRoomHandler(context: Context) {
         }, {
             [roomCreatorPlayerId]: [],
             [session.getUser().id]: [],
-        });
+        }, roomCreatorPlayerId);
 
         db.games.add(game);
 
