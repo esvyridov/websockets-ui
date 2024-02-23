@@ -36,7 +36,7 @@ Registration rules:
 - returns error if a user is already logged in
 - players are persisted until the server is reloaded, it means you can refresh a page and logged in again with correct name and password
 
-## Usage
+## Gameplay
 
 *Registration*
 
