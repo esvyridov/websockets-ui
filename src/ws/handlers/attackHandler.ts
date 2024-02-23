@@ -59,11 +59,19 @@ export function attackHandler(context: Context) {
             const playersWss = [indexPlayerWs, otherIndexPlayerWs].filter((ws): ws is WebSocket => !!ws);
     
             if (targetGame._shots[indexPlayer].some((shot) => shot.x === x && shot.y === y)) {
+                targetGame._nextPlayerIdTurn = +otherIndexPlayer;
                 playersWss.forEach((ws) => {
                     turnResponse(ws, {
                         currentPlayer: targetGame._nextPlayerIdTurn,
                     });
-                })
+                });
+                if (+otherIndexPlayer === BOT_ID) {
+                    await sleep();
+                    randomAttackHandler(context)(JSON.stringify({
+                        gameId,
+                        indexPlayer: +otherIndexPlayer,
+                    }))
+                }
                 return;
             }
 

@@ -56,7 +56,9 @@ Registration rules:
 *Game*
 - A game starts when a room has two users.
 - A game is deleted after the game has a winner.
+- If a user shoots in the same place twice, then next turn goes to another user.
 - If a user is in the game and disconnects from the server, then his/her rival gets the win.
 
 *Bot*
-- A bot shoots every .5s randomly when it's bot's turn. A shot is unique meaning that the bot can't shoot in the same place twice.
+- The bot shoots every .5s randomly when it's bot's turn. A shot is unique meaning that the bot can't shoot in the same place twice.
+- The bot isn't shown in the Winners list.
