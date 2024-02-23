@@ -62,3 +62,7 @@ Registration rules:
 *Bot*
 - The bot shoots every .5s randomly when it's bot's turn. A shot is unique meaning that the bot can't shoot in the same place twice.
 - The bot isn't shown in the Winners list.
+
+## Logs
+
+I added logs to almost all events that happen on the server. If something doesn't work as you expected, please check the logs, maybe you'll be able to find out what is going on. Thank you!
