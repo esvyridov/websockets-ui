@@ -12,6 +12,7 @@ export function addUserToRoomHandler(context: Context) {
 
         const { indexRoom } = JSON.parse(data);
 
+        const user = session.getUser();
         const targetRoom = db.rooms.getRoomById(indexRoom);
 
         if (!targetRoom) {
@@ -26,6 +27,11 @@ export function addUserToRoomHandler(context: Context) {
             return;
         }
 
+        if (roomCreatorPlayerId === user.id) {
+            console.log(`Command - add_user_to_room. Error: Can't join the room because ${user.name}:${user.id} is creator of the room.`);
+            return;
+        }
+
         const roomCreatorWs = socketsMap.get(roomCreatorPlayerId);
 
         if (!roomCreatorWs) {
@@ -33,6 +39,9 @@ export function addUserToRoomHandler(context: Context) {
             return;
         }
 
+        const userRoom = db.rooms.getRoomByUserId(user.id);
+
+        userRoom && db.rooms.deleteById(userRoom.roomId)
         db.rooms.deleteById(targetRoom.roomId);
 
         updateRoomsResponse(context)();
